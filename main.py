@@ -7,6 +7,7 @@ WIDTH = 500
 PIPES_SPACING = 100
 PIPES_WIDTH = 50
 LIFT = 10
+OFFSET = 100
 
 
 class Game:
@@ -49,12 +50,12 @@ class Bird:
 class Pipe:
     def __init__(self):
         self.x = WIDTH
-        self.top = random.randint(200, HEIGHT - 200)
-        self.bottom = HEIGHT - (self.top + 100)
+        self.top = random.randint(OFFSET, HEIGHT - OFFSET)
+        self.bottom = HEIGHT - (self.top + PIPES_SPACING)
         self.velocity = 3
 
     def draw(self, screen):
-        pygame.draw.rect(screen, (0, 255, 0), (self.x, 0, 50, self.top))
+        pygame.draw.rect(screen, (0, 255, 0), (self.x, 0, PIPES_WIDTH, self.top))
         pygame.draw.rect(screen, (0, 255, 0), (self.x, self.top + PIPES_SPACING, PIPES_WIDTH, self.bottom))
 
     def update(self):
