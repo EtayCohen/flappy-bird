@@ -6,6 +6,7 @@ HEIGHT = 500
 WIDTH = 500
 PIPES_SPACING = 100
 PIPES_WIDTH = 50
+LIFT = 10
 
 
 class Game:
@@ -85,7 +86,7 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
-                    game.bird.velocity -= 10
+                    game.bird.velocity -= LIFT
             if event.type == pygame.QUIT:
                 pygame.quit()
         pygame.display.flip()
