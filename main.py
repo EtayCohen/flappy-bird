@@ -2,11 +2,12 @@ import pygame, random
 
 pygame.init()
 
-HEIGHT = 500
-WIDTH = 500
+HEIGHT = 512
+WIDTH = 512
 PIPES_SPACING = 100
 PIPES_WIDTH = 50
-LIFT = 10
+GRAVITY = 0.65
+LIFT = 13.5
 OFFSET = 100
 
 
@@ -17,6 +18,8 @@ class Game:
         self.screen.fill((255, 255, 255))
         self.bird = Bird()
         self.pipes = []
+        self.lost = False
+        self.score = 0
 
     def draw(self):
         self.bird.draw(self.screen)
@@ -28,23 +31,36 @@ class Game:
         for pipe in self.pipes:
             pipe.update()
 
+    def restart(self):
+        self.screen.fill((255, 255, 255))
+        self.bird = Bird()
+        self.pipes = []
+        self.lost = False
+        self.score = 0
+
+    def stop(self):
+        for pipe in self.pipes:
+            pipe.stop()
+
 
 class Bird:
     def __init__(self):
-        self.x = 100
+        self.x = WIDTH//4
         self.y = HEIGHT/2
         self.velocity = 0
-        self.gravity = 0.8
+        self.gravity = GRAVITY
 
     def draw(self, screen):
         screen.fill((255, 255, 255))
         pygame.draw.circle(screen, (255, 0, 0), (self.x, int(self.y)), 20)
 
     def update(self):
-        if self.velocity < 20:
+        if self.y < HEIGHT:
             self.velocity += self.gravity
-        self.y += self.velocity
-        self.y %= HEIGHT
+            self.y += self.velocity
+
+    def is_hit(self):
+        return not 0 < self.y < HEIGHT
 
 
 class Pipe:
@@ -63,35 +79,44 @@ class Pipe:
 
     def is_hit(self, bird):
         if bird.y > self.top + PIPES_SPACING or bird.y < self.top:
-            if self.x + 50 > bird.x > self.x:
-                print("HIT")
+            if self.x + PIPES_WIDTH > bird.x > self.x:
+                return True
+        return False
+
+    def stop(self):
+        self.velocity = 0
 
 
 def main():
-    frames = 0
+    frames, stop = 0, False
     clock = pygame.time.Clock()
     game = Game()
     # Game loop.
-    while True:
-        for pipe in game.pipes:
-            pipe.is_hit(game.bird)
-        if not (frames % 100):
-            game.pipes.append(Pipe())
-            if len(game.pipes) > 2:
-                game.pipes.pop(0)
-        # Game update
+    while not stop:
+        if not game.lost:
+            for pipe in game.pipes:
+                if pipe.is_hit(game.bird) or game.bird.is_hit():
+                    game.stop()
+                    game.lost = True
+            if not (frames % 110):
+                game.pipes.append(Pipe())
+                if len(game.pipes) > 2:
+                    game.pipes.pop(0)
         game.update()
-        # Game draw
         game.draw()
         frames += 1
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE:
+                    if game.lost:
+                        game.restart()
                     game.bird.velocity -= LIFT
             if event.type == pygame.QUIT:
-                pygame.quit()
+                stop = True
+
         pygame.display.flip()
-        clock.tick(30)
+        clock.tick(60)
+    pygame.quit()
 
 
 if __name__ == '__main__':
