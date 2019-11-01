@@ -1,14 +1,17 @@
 import pygame, random
 
 pygame.init()
-
+pygame.font.init()
+pygame.display.set_caption('FLAPPY-BIRD')
+font = pygame.font.Font(None, 50)
 HEIGHT = 512
 WIDTH = 512
 PIPES_SPACING = 100
 PIPES_WIDTH = 50
 GRAVITY = 0.65
 LIFT = 13.5
-OFFSET = 100
+OFFSET = 50
+PIPE_VELOCITY = 3
 
 
 class Game:
@@ -52,7 +55,7 @@ class Bird:
 
     def draw(self, screen):
         screen.fill((255, 255, 255))
-        pygame.draw.circle(screen, (255, 0, 0), (self.x, int(self.y)), 20)
+        pygame.draw.circle(screen, (250, 250, 0), (self.x, int(self.y)), 20)
 
     def update(self):
         if self.y < HEIGHT:
@@ -66,9 +69,10 @@ class Bird:
 class Pipe:
     def __init__(self):
         self.x = WIDTH
-        self.top = random.randint(OFFSET, HEIGHT - OFFSET)
+        self.top = random.randint(OFFSET, HEIGHT - OFFSET - PIPES_SPACING)
         self.bottom = HEIGHT - (self.top + PIPES_SPACING)
-        self.velocity = 3
+        self.velocity = PIPE_VELOCITY
+        self.passed = False
 
     def draw(self, screen):
         pygame.draw.rect(screen, (0, 255, 0), (self.x, 0, PIPES_WIDTH, self.top))
@@ -86,6 +90,11 @@ class Pipe:
     def stop(self):
         self.velocity = 0
 
+    def been_passed(self, bird, game):
+        if not self.passed and (self.x + PIPES_WIDTH + 20 < bird.x):
+            self.passed = True
+            game.score += 1
+
 
 def main():
     frames, stop = 0, False
@@ -95,6 +104,7 @@ def main():
     while not stop:
         if not game.lost:
             for pipe in game.pipes:
+                pipe.been_passed(game.bird, game)
                 if pipe.is_hit(game.bird) or game.bird.is_hit():
                     game.stop()
                     game.lost = True
@@ -102,8 +112,10 @@ def main():
                 game.pipes.append(Pipe())
                 if len(game.pipes) > 2:
                     game.pipes.pop(0)
+
         game.update()
         game.draw()
+        game.screen.blit(font.render('{0}'.format(game.score), 1, (0, 100, 200)), (WIDTH/2, 20))
         frames += 1
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
