@@ -6,10 +6,10 @@ pygame.display.set_caption('FLAPPY-BIRD')
 font = pygame.font.Font(None, 50)
 HEIGHT = 512
 WIDTH = 512
-PIPES_SPACING = 100
+PIPES_SPACING = 120
 PIPES_WIDTH = 50
-GRAVITY = 0.65
-LIFT = 13.5
+GRAVITY = 0.6
+LIFT = - 12
 OFFSET = 50
 PIPE_VELOCITY = 3
 
@@ -58,12 +58,18 @@ class Bird:
         pygame.draw.circle(screen, (250, 250, 0), (self.x, int(self.y)), 20)
 
     def update(self):
-        if self.y < HEIGHT:
-            self.velocity += self.gravity
-            self.y += self.velocity
+        self.velocity += self.gravity
+        self.y += self.velocity
+        if self.y >= HEIGHT - 10:
+            self.y = HEIGHT - 10/2
+            self.velocity = 0
 
-    def is_hit(self):
-        return not 0 < self.y < HEIGHT
+        if self.y <= 10:
+            self.y = 10
+            self.velocity = 0
+
+    def up(self):
+        self.velocity += LIFT
 
 
 class Pipe:
@@ -82,8 +88,8 @@ class Pipe:
         self.x -= self.velocity
 
     def is_hit(self, bird):
-        if bird.y > self.top + PIPES_SPACING or bird.y < self.top:
-            if self.x + PIPES_WIDTH > bird.x > self.x:
+        if bird.y > self.top + PIPES_SPACING - 10 or bird.y < self.top:
+            if self.x + PIPES_WIDTH > bird.x > self.x - 10:
                 return True
         return False
 
@@ -105,7 +111,7 @@ def main():
         if not game.lost:
             for pipe in game.pipes:
                 pipe.been_passed(game.bird, game)
-                if pipe.is_hit(game.bird) or game.bird.is_hit():
+                if pipe.is_hit(game.bird):
                     game.stop()
                     game.lost = True
             if not (frames % 110):
@@ -122,7 +128,7 @@ def main():
                 if event.key == pygame.K_SPACE:
                     if game.lost:
                         game.restart()
-                    game.bird.velocity -= LIFT
+                    game.bird.up()
             if event.type == pygame.QUIT:
                 stop = True
 
