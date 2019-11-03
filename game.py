@@ -1,4 +1,4 @@
-from flappybird import Game, Bird , Pipe
+from flappybird import Game, Pipe
 import pygame
 
 pygame.init()
