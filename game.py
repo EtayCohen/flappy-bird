@@ -1,11 +1,6 @@
 from flappybird import Game, Pipe
 import pygame
 
-pygame.init()
-pygame.font.init()
-pygame.display.set_caption('FLAPPY-BIRD')
-font = pygame.font.Font(None, 50)
-
 
 def main():
     frames, stop = 0, False
@@ -42,4 +37,8 @@ def main():
 
 
 if __name__ == '__main__':
+    pygame.init()
+    pygame.font.init()
+    pygame.display.set_caption('FLAPPY-BIRD')
+    font = pygame.font.Font(None, 50)
     main()
