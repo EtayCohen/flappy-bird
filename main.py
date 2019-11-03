@@ -4,14 +4,17 @@ pygame.init()
 pygame.font.init()
 pygame.display.set_caption('FLAPPY-BIRD')
 font = pygame.font.Font(None, 50)
-HEIGHT = 512
-WIDTH = 512
+
+
+HEIGHT = 480
+WIDTH = 640
 PIPES_SPACING = 120
 PIPES_WIDTH = 50
 GRAVITY = 0.6
 LIFT = - 12
 OFFSET = 50
 PIPE_VELOCITY = 3
+SIZE = 20
 
 
 class Game:
@@ -52,10 +55,12 @@ class Bird:
         self.y = HEIGHT/2
         self.velocity = 0
         self.gravity = GRAVITY
+        self.score = 0
+        self.fitness = 0
 
     def draw(self, screen):
         screen.fill((255, 255, 255))
-        pygame.draw.circle(screen, (250, 250, 0), (self.x, int(self.y)), 20)
+        pygame.draw.circle(screen, (250, 250, 0), (self.x, int(self.y)), SIZE)
 
     def update(self):
         self.velocity += self.gravity
@@ -88,8 +93,8 @@ class Pipe:
         self.x -= self.velocity
 
     def is_hit(self, bird):
-        if bird.y > self.top + PIPES_SPACING - 10 or bird.y < self.top:
-            if self.x + PIPES_WIDTH > bird.x > self.x - 10:
+        if bird.y > self.top + PIPES_SPACING - SIZE or bird.y < self.top + 20:
+            if self.x + PIPES_WIDTH > bird.x > self.x - SIZE:
                 return True
         return False
 
@@ -97,9 +102,12 @@ class Pipe:
         self.velocity = 0
 
     def been_passed(self, bird, game):
-        if not self.passed and (self.x + PIPES_WIDTH + 20 < bird.x):
+        if not self.passed and (self.x + PIPES_WIDTH + SIZE < bird.x):
             self.passed = True
             game.score += 1
+
+    def offscreen(self):
+        return self.x < - PIPES_WIDTH
 
 
 def main():
@@ -111,14 +119,13 @@ def main():
         if not game.lost:
             for pipe in game.pipes:
                 pipe.been_passed(game.bird, game)
+                if pipe.offscreen():
+                    game.pipes.pop(0)
                 if pipe.is_hit(game.bird):
                     game.stop()
                     game.lost = True
             if not (frames % 110):
                 game.pipes.append(Pipe())
-                if len(game.pipes) > 2:
-                    game.pipes.pop(0)
-
         game.update()
         game.draw()
         game.screen.blit(font.render('{0}'.format(game.score), 1, (0, 100, 200)), (WIDTH/2, 20))
@@ -139,3 +146,4 @@ def main():
 
 if __name__ == '__main__':
     main()
+
