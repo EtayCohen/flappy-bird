@@ -1,9 +1,6 @@
 import pygame, random
 
-pygame.init()
-pygame.font.init()
-pygame.display.set_caption('FLAPPY-BIRD')
-font = pygame.font.Font(None, 50)
+
 HEIGHT = 480
 WIDTH = 640
 PIPES_SPACING = 120
